@@ -1,7 +1,7 @@
 package com.qq.wx.service;
 
 import com.alibaba.fastjson.JSON;
-import com.qq.wx.config.TokenProperty;
+import com.qq.wx.config.WxProperty;
 import com.qq.wx.entity.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,28 +12,25 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 @Slf4j
 public class TokenServiceImpl implements TokenService {
     @Autowired
-    private TokenProperty tokenProperty;
+    private WxProperty wxProperty;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
-    @Scheduled(fixedRate = 1000*10)
+    @Scheduled(fixedRate = 1000*3600)
     @Async
     public void getToken() {
-        StringBuffer url = new StringBuffer(tokenProperty.getTokenUrl());
+        StringBuffer url = new StringBuffer(wxProperty.getTokenUrl());
         url.append("?grant_type=client_credential&appid=")
-                .append(tokenProperty.getAppId())
+                .append(wxProperty.getAppId())
                 .append("&secret=")
-                .append(tokenProperty.getAppSecret());
+                .append(wxProperty.getAppSecret());
         String tokenStr = restTemplate.getForObject(url.toString(), String.class);
         Token token = JSON.parseObject(tokenStr, Token.class);
         log.info("获取access_token>>>>>>>>>>>>>" + token);
